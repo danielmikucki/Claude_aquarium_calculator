@@ -337,7 +337,7 @@
       </div>
       <div class="field">
         <label>Szacunkowa woda w filtrze / rury</label>
-        <input type="number" id="filterVolume" value="10" min="0" max="1000" step="1" />
+        <input type="number" id="filterVolume" value="0" min="0" max="1000" step="1" />
         <span class="unit">litry (L)</span>
       </div>
       <div class="field">
@@ -719,7 +719,7 @@
 
   function resetForm() {
     document.getElementById('tankVolume').value = 100;
-    document.getElementById('filterVolume').value = 10;
+    document.getElementById('filterVolume').value = 0;
     document.getElementById('tankType').value = 'planted';
     document.getElementById('doseSchedule').value = 'daily';
     document.getElementById('resultsCard').style.display = 'none';
