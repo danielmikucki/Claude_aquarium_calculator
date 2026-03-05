@@ -2,12 +2,17 @@
   "name": "aquarium-fertilizer-calculator",
   "version": "1.0.0",
   "description": "Freshwater aquarium fertilizer dosing calculator for RO water",
+  "main": "server.js",
   "scripts": {
+    "start": "node server.js",
     "test": "playwright test",
     "test:headed": "playwright test --headed",
     "test:report": "playwright test --reporter=html && playwright show-report"
   },
+  "dependencies": {
+    "express": "^4.22.1"
+  },
   "devDependencies": {
-    "@playwright/test": "^1.41.0"
+    "@playwright/test": "^1.56.0"
   }
 }

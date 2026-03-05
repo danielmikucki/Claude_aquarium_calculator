@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kalkulator Nawozów Akwariowych – Woda RO</title>
+  <style>
+    :root {
+      --bg: #0d1b2a;
+      --surface: #1b2d3e;
+      --surface2: #243447;
+      --accent: #00c8ff;
+      --accent2: #00e5b0;
+      --text: #e2eaf4;
+      --muted: #7a9ab8;
+      --warn: #ffaa00;
+      --danger: #ff4f5e;
+      --radius: 12px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px 16px 48px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      color: var(--accent);
+      letter-spacing: 0.5px;
+    }
+
+    header p {
+      color: var(--muted);
+      margin-top: 6px;
+      font-size: 0.95rem;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      display: grid;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .card h2 {
+      font-size: 1.05rem;
+      color: var(--accent2);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card h2 .icon { font-size: 1.2rem; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    input[type="number"], select {
+      background: var(--surface2);
+      border: 1px solid #2e4560;
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+
+    input[type="number"]:focus, select:focus {
+      border-color: var(--accent);
+    }
+
+    input[type="number"]::-webkit-inner-spin-button { opacity: 0.5; }
+
+    .unit {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
+      border-radius: 8px;
+      padding: 12px 28px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      margin-top: 6px;
+    }
+
+    .btn:hover { opacity: 0.88; }
+    .btn:active { transform: scale(0.97); }
+
+    .btn-secondary {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid #2e4560;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    /* Results */
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+    }
+
+    .result-item {
+      background: var(--surface2);
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+      border: 1px solid #2e4560;
+      transition: border-color 0.2s;
+    }
+
+    .result-item.highlight { border-color: var(--accent2); }
+
+    .result-label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .result-value {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .result-value.warn { color: var(--warn); }
+    .result-value.ok   { color: var(--accent2); }
+
+    .result-unit {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* Fertilizer table */
+    .fert-table-wrapper { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    th {
+      text-align: left;
+      padding: 10px 12px;
+      color: var(--muted);
+      border-bottom: 1px solid #2e4560;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #1e3148;
+      vertical-align: middle;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(0,200,255,0.04); }
+
+    .dose-cell { font-weight: 700; color: var(--accent); }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-macro { background: #1a3a5c; color: #5ab4ff; }
+    .badge-micro { background: #1a3c2e; color: var(--accent2); }
+    .badge-ro    { background: #2c2a1a; color: var(--warn); }
+
+    /* Notes */
+    .note {
+      background: #1a2e1a;
+      border-left: 3px solid var(--accent2);
+      border-radius: 6px;
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      color: var(--text);
+      margin-top: 16px;
+      line-height: 1.6;
+    }
+
+    .note.warn-note {
+      background: #2a2210;
+      border-left-color: var(--warn);
+    }
+
+    /* Remineralisation panel */
+    .reminerals-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+    }
+
+    .reminerals-item {
+      background: var(--surface2);
+      border-radius: 10px;
+      padding: 14px 16px;
+      border: 1px solid #2e4560;
+    }
+
+    .reminerals-item .name {
+      font-size: 0.85rem;
+      color: var(--text);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .reminerals-item .dose-big {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--warn);
+    }
+
+    .reminerals-item .sub {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      padding: 8px 18px;
+      border: 1px solid #2e4560;
+      background: var(--surface2);
+      color: var(--muted);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: var(--bg);
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.78rem;
+      margin-top: 36px;
+    }
+
+    @media (max-width: 480px) {
+      header h1 { font-size: 1.4rem; }
+      .btn { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🌿 Kalkulator Nawozów Akwariowych</h1>
+  <p>Dawkowanie dla akwarium słodkowodnego zasilanego wodą RO</p>
+</header>
+
+<div class="container">
+
+  <!-- Parametry akwarium -->
+  <div class="card">
+    <h2><span class="icon">🐟</span> Parametry akwarium</h2>
+    <div class="form-grid">
+      <div class="field">
+        <label>Objętość akwarium</label>
+        <input type="number" id="tankVolume" value="100" min="1" max="10000" step="1" />
+        <span class="unit">litry (L)</span>
+      </div>
+      <div class="field">
+        <label>Szacunkowa woda w filtrze / rury</label>
+        <input type="number" id="filterVolume" value="0" min="0" max="1000" step="1" />
+        <span class="unit">litry (L)</span>
+      </div>
+      <div class="field">
+        <label>Typ zbiornika</label>
+        <select id="tankType">
+          <option value="planted">Mocno obsadzone (planted)</option>
+          <option value="medium">Średnio obsadzone</option>
+          <option value="low">Skąpo obsadzone / low-tech</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Schemat dozowania</label>
+        <select id="doseSchedule">
+          <option value="daily">Codziennie</option>
+          <option value="3x">3× w tygodniu</option>
+          <option value="weekly">Raz w tygodniu</option>
+        </select>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="calculate()">⚡ Oblicz dawki</button>
+      <button class="btn btn-secondary" onclick="resetForm()">↺ Reset</button>
+    </div>
+  </div>
+
+  <!-- Wyniki -->
+  <div class="card" id="resultsCard" style="display:none">
+    <h2><span class="icon">📊</span> Wyniki</h2>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('fertilizers', this)">Nawozy</button>
+      <button class="tab-btn" onclick="switchTab('remineralization', this)">Remineralizacja RO</button>
+      <button class="tab-btn" onclick="switchTab('schedule', this)">Harmonogram</button>
+    </div>
+
+    <!-- Tab: Nawozy -->
+    <div class="tab-pane active" id="tab-fertilizers">
+      <div class="fert-table-wrapper">
+        <table id="fertTable">
+          <thead>
+            <tr>
+              <th>Nawóz</th>
+              <th>Typ</th>
+              <th>Dawka jednorazowa</th>
+              <th>Dawka tygodniowa</th>
+              <th>Stężenie docelowe</th>
+            </tr>
+          </thead>
+          <tbody id="fertBody"></tbody>
+        </table>
+      </div>
+      <div class="note">
+        💡 <strong>Wskazówka:</strong> Dawki są orientacyjne i oparte na metodzie EI (Estimative Index) / PPS-Pro.
+        Obserwuj rośliny i ryby – w razie glonów zmniejsz dawkę makro o 25%, przy braku wzrostu zwiększ mikro o 20%.
+        Zawsze rób <strong>podmianę 30–50% wody tygodniowo</strong>.
+      </div>
+    </div>
+
+    <!-- Tab: Remineralizacja -->
+    <div class="tab-pane" id="tab-remineralization">
+      <p style="color:var(--muted);font-size:0.88rem;margin-bottom:16px;">
+        Woda RO ma przewodność ≈ 0 µS/cm. Poniższe dawki pozwolą uzyskać parametry odpowiednie dla akwarium roślinnego.
+        Docelowe GH: <strong>4–8°dH</strong>, KH: <strong>2–4°dKH</strong>, pH: <strong>6,8–7,2</strong>.
+      </p>
+      <div class="reminerals-grid" id="remineralsGrid"></div>
+      <div class="note warn-note">
+        ⚠️ <strong>Uwaga:</strong> Podane ilości dotyczą każdorazowo uzupełnianej / podmienianej wody RO przed wlaniem do akwarium.
+        Nie dodawaj remineralizatorów bezpośrednio do akwarium z rybami – najpierw przygotuj wodę w oddzielnym pojemniku.
+      </div>
+    </div>
+
+    <!-- Tab: Harmonogram -->
+    <div class="tab-pane" id="tab-schedule">
+      <div id="scheduleContent"></div>
+      <div class="note">
+        🗓️ Trzymaj się harmonogramu przez <strong>4–6 tygodni</strong> przed wprowadzaniem zmian.
+        Notuj obserwacje dotyczące wzrostu roślin i ewentualnych glonów.
+      </div>
+    </div>
+  </div>
+
+  <!-- Parametry docelowe -->
+  <div class="card" id="targetCard" style="display:none">
+    <h2><span class="icon">🎯</span> Parametry docelowe wody</h2>
+    <div class="results-grid" id="targetGrid"></div>
+  </div>
+
+</div>
+
+<footer>
+  Kalkulator oparty na metodach EI (Tom Barr) i PPS-Pro · Wartości orientacyjne · Zawsze testuj wodę
+</footer>
+
+<script>
+  async function calculate() {
+    // Wyczyść tbody – Playwright poczeka na ponowne pojawienie się .dose-cell
+    document.getElementById('fertBody').innerHTML = '';
+
+    const body = {
+      tankVolume:   document.getElementById('tankVolume').value,
+      filterVolume: document.getElementById('filterVolume').value,
+      tankType:     document.getElementById('tankType').value,
+      doseSchedule: document.getElementById('doseSchedule').value,
+    };
+
+    const res  = await fetch('/api/calculate', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(body),
+    });
+    const data = await res.json();
+
+    renderFertilizers(data.fertilizers);
+    renderReminerals(data.reminerals);
+    renderSchedule(data.schedule);
+    renderTargets(data.targets);
+
+    document.getElementById('resultsCard').style.display = '';
+    document.getElementById('targetCard').style.display  = '';
+    document.getElementById('resultsCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function renderFertilizers(fertilizers) {
+    const tbody = document.getElementById('fertBody');
+    tbody.innerHTML = '';
+    fertilizers.forEach(f => {
+      const perDoseStr  = f.perDose  !== null ? f.perDose.toFixed(2)  + ' ' + f.unit : '–';
+      const weekDoseStr = f.weekDose !== null ? f.weekDose.toFixed(2) + ' ' + f.unit : '–';
+      const ppmStr      = f.ppm     !== null ? f.ppm + ' mg/L' : '–';
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>
+          <strong>${f.name}</strong><br/>
+          <span style="color:var(--muted);font-size:0.78rem">${f.product}</span>
+        </td>
+        <td>
+          <span class="badge ${f.type === 'macro' ? 'badge-macro' : 'badge-micro'}">
+            ${f.type === 'macro' ? 'MAKRO' : 'MIKRO'}
+          </span>
+        </td>
+        <td class="dose-cell">${perDoseStr}</td>
+        <td>${weekDoseStr}</td>
+        <td>${ppmStr}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function renderReminerals(reminerals) {
+    const grid = document.getElementById('remineralsGrid');
+    grid.innerHTML = '';
+    reminerals.forEach(r => {
+      const div = document.createElement('div');
+      div.className = 'reminerals-item';
+      div.innerHTML = `
+        <div class="name">${r.name}</div>
+        <div class="dose-big">${r.dose} ${r.unit}</div>
+        <div class="sub">${r.product}</div>
+        <div class="sub" style="margin-top:6px;color:#a0b8c8">${r.effect}</div>
+      `;
+      grid.appendChild(div);
+    });
+  }
+
+  function renderSchedule(schedule) {
+    const colorMap = { macro: '#5ab4ff', micro: 'var(--accent2)', wc: 'var(--warn)' };
+    const rows = schedule.map(({ day, actions }) => {
+      const cells = actions.length
+        ? actions.map(a => `<span style="color:${colorMap[a.kind]}">${a.text}</span>`).join(' &nbsp;|&nbsp; ')
+        : `<span style="color:var(--muted)">–</span>`;
+      return `<tr>
+        <td style="white-space:nowrap;font-weight:600;color:var(--text)">${day}</td>
+        <td style="line-height:1.9">${cells}</td>
+      </tr>`;
+    });
+
+    document.getElementById('scheduleContent').innerHTML = `
+      <table>
+        <thead><tr><th>Dzień</th><th>Czynności</th></tr></thead>
+        <tbody>${rows.join('')}</tbody>
+      </table>`;
+  }
+
+  function renderTargets(targets) {
+    document.getElementById('targetGrid').innerHTML = targets.map(t => `
+      <div class="result-item">
+        <div class="result-label">${t.label}</div>
+        <div class="result-value ${t.cls}" style="font-size:1rem">${t.value}</div>
+      </div>
+    `).join('');
+  }
+
+  function switchTab(id, btn) {
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  function resetForm() {
+    document.getElementById('tankVolume').value  = 100;
+    document.getElementById('filterVolume').value = 0;
+    document.getElementById('tankType').value     = 'planted';
+    document.getElementById('doseSchedule').value = 'daily';
+    document.getElementById('resultsCard').style.display = 'none';
+    document.getElementById('targetCard').style.display  = 'none';
+  }
+
+  window.addEventListener('DOMContentLoaded', calculate);
+</script>
+</body>
+</html>

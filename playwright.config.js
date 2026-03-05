@@ -13,4 +13,9 @@ module.exports = defineConfig({
     { name: 'firefox',  use: { browserName: 'firefox' } },
   ],
   reporter: [['list'], ['html', { open: 'never' }]],
+  webServer: {
+    command: 'node server.js',
+    url: 'http://localhost:3000',
+    reuseExistingServer: !process.env.CI,
+  },
 });

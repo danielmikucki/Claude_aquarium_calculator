@@ -1,7 +1,6 @@
 const { test, expect } = require('@playwright/test');
-const path = require('path');
 
-const url = 'file://' + path.resolve(__dirname, '../index.html');
+const url = 'http://localhost:3000';
 
 test.beforeEach(async ({ page }) => {
   await page.goto(url);
